@@ -31,11 +31,15 @@ aex$Date = as.Date(aex$Date)
 ### 1.a
 
 ```{r}
+library(hrbrthemes)
+
+
 ggplot(aex) +
   geom_line(mapping=aes(x=Date, y=Open, group=1), color = "blue", linetype = "solid", linewidth = .1) +
   geom_line(mapping=aes(x=Date, y=Close, group=1), color = "red", linetype = "solid", linewidth = .1) +
   scale_x_date(date_breaks = "1 year", date_labels =  "%Y") +
-  theme(axis.text.x=element_text(angle=60, hjust=1))
+  theme_ipsum() + 
+  theme(axis.text=element_text(face="bold"),axis.title.x=element_text(face="bold"),axis.title.y=element_text(face="bold"),axis.text.x=element_text(angle=60, hjust=1))
 ```
 
 We notice a major decline happening around 1998 after a time of unprecedented growth. This crash likely was caused by the Russian financial crisis at the time, which resulted in steep inflation coupled with major loans issued by the IMF, on which they defaulted at that period in time.
