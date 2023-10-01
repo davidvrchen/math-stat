@@ -194,32 +194,111 @@ est
 library(LaplacesDemon)
 library(dplyr)
 library(MASS)
-centered <- aex_2004$Returns - mean(aex_2004$Returns)
+```
 
-params = fitdistr(centered, "t")
-df=params$estimate[3]
-sd = params$estimate[2]
 
-# print(0.006730552/sd(centered))
+```{r}
+centered_2004 <- aex_2004$Returns - mean(aex_2004$Returns)
 
-x2 <- seq(min(centered), max(centered), length=length(centered)-1)
-x2 <- seq(min(centered), max(centered), length=length(centered)-1)
-fun1 <- dst(x2, sigma=sd(centered)*0.9, nu=5)
-fun21 <- dst(x2, sigma=0.006730552, nu=9.636221)
+params_2004 = fitdistr(centered_2004, "t")
+df_2004=params_2004$estimate[3]
+sd_2004 = params_2004$estimate[2]
 
-fun2 <- dst(x2, mu=params$estimate[1], sigma=sd, nu=df)
 
-fun3 <- dst(x2, sigma=sd(centered), nu=length(centered)-1)
-hist(centered, prob=TRUE, breaks=20)
+
+
+x_2004 <- seq(min(centered_2004), max(centered_2004), length=length(centered_2004)-1)
+
+# fun1 <- dst(x2, sigma=sd(centered)*0.9, nu=5)
+# fun21 <- dst(x2, sigma=0.006730552, nu=9.636221)
+
+fun2 <- dst(x_2004, mu=params_2004$estimate[1], sigma=sd_2004, nu=df_2004)
+
+# fun3 <- dst(x2, sigma=sd(centered), nu=length(centered)-1)
+hist(centered_2004, prob=TRUE, breaks=20)
 # lines(x2, fun1, col=1,lwd=2)
-lines(x2, fun2, col=2,lwd=2)
+lines(x_2004, fun2, col=2,lwd=2)
 # lines(x2, fun3, col=3,lwd=2)
+```
+fitdistr uses maximum likelihood estimation. The optimization is done using the optim function in r.
+This is based on Nelder-Mead, quasi-Newton and conjugate-gradient algorithms
+
+```{r}
+centered_2006 <- aex_2006$Returns - mean(aex_2006$Returns)
+
+params_2006 = fitdistr(centered_2006, "t")
+df_2006 =params_2006$estimate[3]
+sd_2006 = params_2006$estimate[2]
+
+
+
+
+x_2006 <- seq(min(centered_2006), max(centered_2006), length=length(centered_2006)-1)
+
+
+fun_2006 <- dst(x_2006, mu=params_2006$estimate[1], sigma=sd_2006, nu=df_2006)
+
+
+hist(centered_2006, prob=TRUE, breaks=20)
+
+lines(x_2006, fun_2006, col=2,lwd=2)
+
 ```
 
 
 ```{r}
 
-qst(0.01, mu=params$estimate[1], sigma=params$estimate[2], nu=params$estimate[3])
+VaR_2004 = qst(0.01, mu=params_2004$estimate[1], sigma=params_2004$estimate[2], nu=params_2004$estimate[3])
+VaR_2006 = qst(0.01, mu=params_2006$estimate[1], sigma=params_2006$estimate[2], nu=params_2006$estimate[3])
+
+VaR_2004
+VaR_2006
+
+```
+
+
+
+```{r}
 quantile(aex_2004$Returns, probs=0.01)
+quantile(aex_2006$Returns, probs=0.01)
+```
+```{r}
+
+mean_2004 = mean(aex_2004$Returns) 
+var_2004 = var(aex_2004$Returns)
+sd_2004 = sd(aex_2004$Returns)
+left_2004 = mean_2004 + qnorm(0.025)*sd_2004/sqrt(length(aex_2004))
+
+right_2004 = mean_2004 + qnorm(1-0.025)*sd_2004/sqrt(length(aex_2004))
+left_2004
+right_2004
+
+```
+The mean is normally distributed.
+```{r}
+hist(aex_2004$Returns, prob=TRUE, breaks=20)
+
+abline(v=left_2004,col='red', lwd=3, lty='dashed')
+abline(v=mean_2004,col='red', lwd=3)
+abline(v=right_2004,col='red', lwd=3, lty='dashed')
+```
+
+```{r}
+mean_2006 = mean(aex_2006$Returns) 
+var_2006 = var(aex_2006$Returns)
+sd_2006 = sd(aex_2006$Returns)
+left_2006 = mean_2006 + qnorm(0.025)*sd_2006/sqrt(length(aex_2006))
+
+right_2006 = mean_2006 + qnorm(1-0.025)*sd_2006/sqrt(length(aex_2006))
+left_2006
+right_2006
+```
+
+```{r}
+hist(aex_2006$Returns, prob=TRUE, breaks=20)
+
+abline(v=left_2006,col='red', lwd=3, lty='dashed')
+abline(v=mean_2006,col='red', lwd=3)
+abline(v=right_2006,col='red', lwd=3, lty='dashed')
 ```
 
