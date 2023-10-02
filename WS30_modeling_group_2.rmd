@@ -198,48 +198,49 @@ library(MASS)
 
 
 ```{r}
-centered_2004 <- aex_2004$Returns - mean(aex_2004$Returns)
+returns_2004 <- aex_2004$Returns
 
-params_2004 = fitdistr(centered_2004, "t")
-df_2004=params_2004$estimate[3]
+params_2004 = fitdistr(returns_2004, "t")
+df_2004 =params_2004$estimate[3]
+mu_2004 = params_2004$estimate[1]
 sd_2004 = params_2004$estimate[2]
 
 
 
 
-x_2004 <- seq(min(centered_2004), max(centered_2004), length=length(centered_2004)-1)
+x_2004 <- seq(min(returns_2004), max(returns_2004), length=length(returns_2004)-1)
 
-# fun1 <- dst(x2, sigma=sd(centered)*0.9, nu=5)
-# fun21 <- dst(x2, sigma=0.006730552, nu=9.636221)
 
-fun2 <- dst(x_2004, mu=params_2004$estimate[1], sigma=sd_2004, nu=df_2004)
+fun_2004 <- dst(x_2004, mu=mu_2004, sigma=sd_2004, nu=df_2004)
 
-# fun3 <- dst(x2, sigma=sd(centered), nu=length(centered)-1)
-hist(centered_2004, prob=TRUE, breaks=20)
-# lines(x2, fun1, col=1,lwd=2)
-lines(x_2004, fun2, col=2,lwd=2)
-# lines(x2, fun3, col=3,lwd=2)
+
+hist(returns_2004, prob=TRUE, breaks=20)
+
+lines(x_2004, fun_2004, col=2,lwd=2)
 ```
 fitdistr uses maximum likelihood estimation. The optimization is done using the optim function in r.
 This is based on Nelder-Mead, quasi-Newton and conjugate-gradient algorithms
 
 ```{r}
-centered_2006 <- aex_2006$Returns - mean(aex_2006$Returns)
+returns_2006 <- aex_2006$Returns
 
-params_2006 = fitdistr(centered_2006, "t")
+params_2006 = fitdistr(returns_2006, "t")
 df_2006 =params_2006$estimate[3]
+mu_2006 = params_2006$estimate[1]
 sd_2006 = params_2006$estimate[2]
 
+library(dplyr)
+library(report)
+report::cite_packages()
 
 
-
-x_2006 <- seq(min(centered_2006), max(centered_2006), length=length(centered_2006)-1)
-
-
-fun_2006 <- dst(x_2006, mu=params_2006$estimate[1], sigma=sd_2006, nu=df_2006)
+x_2006 <- seq(min(returns_2006), max(returns_2006), length=length(returns_2006)-1)
 
 
-hist(centered_2006, prob=TRUE, breaks=20)
+fun_2006 <- dst(x_2006, mu=mu_2006, sigma=sd_2006, nu=df_2006)
+
+
+hist(returns_2006, prob=TRUE, breaks=20)
 
 lines(x_2006, fun_2006, col=2,lwd=2)
 
@@ -271,6 +272,7 @@ left_2004 = mean_2004 + qnorm(0.025)*sd_2004/sqrt(length(aex_2004))
 
 right_2004 = mean_2004 + qnorm(1-0.025)*sd_2004/sqrt(length(aex_2004))
 left_2004
+mean_2004
 right_2004
 
 ```
@@ -291,6 +293,7 @@ left_2006 = mean_2006 + qnorm(0.025)*sd_2006/sqrt(length(aex_2006))
 
 right_2006 = mean_2006 + qnorm(1-0.025)*sd_2006/sqrt(length(aex_2006))
 left_2006
+mean_2006
 right_2006
 ```
 
