@@ -16,9 +16,9 @@ curve(dt(x, 1), from=-3, to=3, add=TRUE, col=7, lwd=3, lty=4)
 
 legend(x = "topright",         
        legend = c(substitute(paste(bold("normal"))),
-                  substitute(paste(bold("r=8"))),
-                  substitute(paste(bold("r=3"))),
-                  substitute(paste(bold("r=1")))),  
+                  substitute(paste(bold(paste(nu," = 8")))),
+                  substitute(paste(bold(paste(nu," = 3")))),
+                  substitute(paste(bold(paste(nu," = 1"))))),  
        lty = c(6,1,2,4),           
        col = c(1,5,6,7),      
        lwd = 3)            
