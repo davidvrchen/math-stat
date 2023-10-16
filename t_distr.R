@@ -1,7 +1,7 @@
 library("ggplot2")
 library(hrbrthemes)
 
-pdf(file = "C:/Users/Admin/Desktop/math-stat/tdistr.pdf",   # The directory you want to save the file in
+pdf(file = "C:/Users/Admin/Desktop/math-stat/figures/tdistr.pdf",   # The directory you want to save the file in
     width = 6, # The width of the plot in inches
     height = 5) # The height of the plot in inches
 

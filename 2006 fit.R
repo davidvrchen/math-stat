@@ -4,10 +4,10 @@ library(LaplacesDemon)
 library(dplyr)
 library(MASS)
 
-pdf(file = "C:/Users/Admin/Desktop/math-stat/2006-fit.pdf", width = 6, height = 5)
+pdf(file = "C:/Users/Admin/Desktop/math-stat/figures/2006-fit.pdf", width = 6, height = 5)
 
 
-aex = read.csv("AEX.csv")
+aex = read.csv("data/AEX.csv")
 aex$Date = as.Date(aex$Date)
 
 aex$Returns = ((aex$Close - aex$Open) / aex$Open)*100
