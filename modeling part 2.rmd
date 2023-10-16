@@ -1,0 +1,34 @@
+```{r}
+# Load the data.
+library("ggplot2")
+library("car")
+library(hrbrthemes)
+library(LaplacesDemon)
+library(dplyr)
+library(MASS)
+library(dplyr)
+library(report)
+
+report::cite_packages()
+
+
+aex = read.csv("data/AEX.csv")
+aex$Date = as.Date(aex$Date)
+
+aex$Returns = (aex$Close - aex$Open) / aex$Open
+aex$Year = format(aex$Date, "%Y")
+
+aex_2004 = aex[aex$Year == 2004, ]
+aex_2006 = aex[aex$Year == 2006, ]
+
+```
+
+
+```{r}
+library(randtests)
+
+runs.test(x=aex_2004$Returns, alternative="left.sided", plot=TRUE)
+runs.test(x=aex_2004$Returns, alternative="right.sided", plot=TRUE)
+runs.test(x=aex_2004$Returns, alternative="two.sided", plot=TRUE)
+```
+
