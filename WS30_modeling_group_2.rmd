@@ -20,7 +20,7 @@ The preview shows you a rendered HTML copy of the contents of the editor. Conseq
 ```{r}
 # Load the data.
 library("ggplot2")
-aex = read.csv("AEX.csv")
+aex = read.csv("data/AEX.csv")
 aex$Date = as.Date(aex$Date)
 ```
 

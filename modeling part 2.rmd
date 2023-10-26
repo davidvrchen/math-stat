@@ -27,8 +27,43 @@ aex_2006 = aex[aex$Year == 2006, ]
 ```{r}
 library(randtests)
 
-runs.test(x=aex_2004$Returns, alternative="left.sided", plot=TRUE)
-runs.test(x=aex_2004$Returns, alternative="right.sided", plot=TRUE)
+
+
+#runs.test(x=aex_2004$Returns, alternative="left.sided", plot=TRUE)
+#runs.test(x=aex_2004$Returns, alternative="right.sided", plot=TRUE)
 runs.test(x=aex_2004$Returns, alternative="two.sided", plot=TRUE)
+```
+```{r}
+signs_returns <- sign(aex_2004$Return - median(aex_2004$Return))
+
+#runs.test(x=signs_returns, alternative="left.sided", plot=TRUE)
+#runs.test(x=signs_returns, alternative="right.sided", plot=TRUE)
+runs.test(x=signs_returns, alternative="two.sided", plot=TRUE)
+```
+
+The p-values are too high to reject the null-hypothesis (the data being iid).
+Since we want to know if the data is iid we use a two sided test.
+
+
+
+```{r}
+library("extraDistr")
+library(goftest)
+aex$Returns = ((aex$Close - aex$Open) / aex$Open)*100
+aex$Year = format(aex$Date, "%Y")
+aex_2004 = aex[aex$Year == 2004, ]
+
+
+returns_2004 <- aex_2004$Returns
+
+params_2004 = fitdistr(returns_2004, "t")
+df_2004 =params_2004$estimate[3]
+mu_2004 = params_2004$estimate[1]
+sd_2004 = params_2004$estimate[2]
+
+
+
+
+ad.test(x=returns_2004, null="pst", nu=df_2004, sigma=sd_2004)
 ```
 
