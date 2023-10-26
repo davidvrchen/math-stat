@@ -47,7 +47,6 @@ Since we want to know if the data is iid we use a two sided test.
 
 
 ```{r}
-library("extraDistr")
 library(goftest)
 aex$Returns = ((aex$Close - aex$Open) / aex$Open)*100
 aex$Year = format(aex$Date, "%Y")
@@ -56,14 +55,43 @@ aex_2004 = aex[aex$Year == 2004, ]
 
 returns_2004 <- aex_2004$Returns
 
-params_2004 = fitdistr(returns_2004, "t")
+params_2004 <- fitdistr(returns_2004, "t",lower=c(-Inf,0,1))
 df_2004 =params_2004$estimate[3]
 mu_2004 = params_2004$estimate[1]
 sd_2004 = params_2004$estimate[2]
 
 
-
-
-ad.test(x=returns_2004, null="pst", nu=df_2004, sigma=sd_2004)
+ad.test(x=returns_2004, null="pst", mu=mu_2004 ,nu=df_2004, sigma=sd_2004, estimated=FALSE)
 ```
+```{r}
+aex_2006 = aex[aex$Year == 2006, ]
+aex_2008 = aex[aex$Year == 2008, ]
+
+#length(aex_2004$Returns)
+returns_2006 <- aex_2006$Returns
+returns_2008 <- aex_2008$Returns[1:length(aex_2008$Returns)/2]
+
+params_2006 <- fitdistr(returns_2006, "t")
+df_2006 =params_2006$estimate[3]
+mu_2006 = params_2006$estimate[1]
+sd_2006 = params_2006$estimate[2]
+
+
+ad.test(x=returns_2006, null="pst", mu=mu_2006 ,nu=df_2006, sigma=sd_2006, estimated=TRUE)
+
+ad.test(x=returns_2008, null="pst", mu=mu_2004 ,nu=df_2004, sigma=sd_2004, estimated=TRUE)
+```
+3.j below 
+```{r}
+aex$Returns <- (aex$Close - aex$Open) / aex$Open
+
+
+
+aex_2005 = aex[aex$Year == 2005, ]
+
+cor.test(x = aex_2005$Returns, y = aex_2005$Volume, alternative = "two.sided", method = "pearson")$p.value
+```
+Note from Ari: 
+The null hypothesis is that the two quantities are independent, while the alternative hypothesis is that they are dependent. The p value is higher than 0.05, so we fail to reject the null hypothesis that they are independent. 
+??Comment: Pearson’s correlation coefficient measures the linear relationship between two variables, and it is appropriate when both variables are continuous and normally distributed . In this case, the daily returns and volume of trades are both continuous variables, so Pearson’s correlation coefficient is a suitable choice.
 
