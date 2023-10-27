@@ -83,15 +83,162 @@ ad.test(x=returns_2008, null="pst", mu=mu_2004 ,nu=df_2004, sigma=sd_2004, estim
 ```
 3.j below 
 ```{r}
-aex$Returns <- (aex$Close - aex$Open) / aex$Open
-
-
-
 aex_2005 = aex[aex$Year == 2005, ]
 
-cor.test(x = aex_2005$Returns, y = aex_2005$Volume, alternative = "two.sided", method = "pearson")$p.value
+cor.test(x = aex_2005$Returns, y = aex_2005$Volume, alternative = "two.sided", method = "spearman")$p.value
 ```
-Note from Ari: 
-The null hypothesis is that the two quantities are independent, while the alternative hypothesis is that they are dependent. The p value is higher than 0.05, so we fail to reject the null hypothesis that they are independent. 
-??Comment: Pearson’s correlation coefficient measures the linear relationship between two variables, and it is appropriate when both variables are continuous and normally distributed . In this case, the daily returns and volume of trades are both continuous variables, so Pearson’s correlation coefficient is a suitable choice.
+
+3.k
+```{r}
+
+ggplot(aex_2008, aes(x = Date, y = Returns)) +
+  geom_point() +
+  labs(x = "Date", y = "Returns")
+
+ggsave("aex_2008_returns.png")
+
+
+
+aex_2008 = aex[aex$Year == 2008, ]
+returns_2008_first_half <- aex_2008$Returns[1:length(aex_2008$Returns)/2]
+returns_2004 <- aex_2004$Returns
+
+
+params_2004 <- fitdistr(returns_2004, "t")
+df_2004 <- params_2004$estimate[3]
+mu_2004 <- params_2004$estimate[1]
+sigma_2004 <- params_2004$estimate[2]
+
+ad_test_result <- ad.test(
+  x = returns_2008_first_half,
+  null = "pst",
+  mu = mu_2004,
+  nu = df_2004,
+  sigma = sigma_2004,
+  estimated = FALSE
+)
+
+print(ad_test_result)
+```
+
+3.i
+
+```{r}
+estimate <- function(new_data, n, mu, sd, df) {
+  params <- fitdistr(new_data, "t", start=list(m=mu, s=sd, df=df), lower=c(-100,0,1), upper=c(100, 1000, n-1))
+  df = params$estimate[3]
+  mu = params$estimate[1]
+  sd = params$estimate[2]
+  statistic <- ad.test(x=new_data, null="pst", mu=mu ,nu=df, sigma=sd)$statistic
+  return(statistic)
+}
+
+bootstrap_test <- function(data, B) {
+  n <- length(data)
+  params <- fitdistr(data, "t")
+  df = params$estimate[3]
+  mu = params$estimate[1]
+  sd = params$estimate[2]
+  orig_statistic <- ad.test(x=data, null="pst", mu=mu ,nu=df, sigma=sd,lower=c(-100,0,1))$statistic
+  sim_stats <- c()
+  success <- 0
+  for (i in 1:B) {
+    new_data <- rst(n, mu=mu, sigma=sd, nu=df)
+    statistic <- try(estimate(new_data, n, mu, sd, df), silent=TRUE)
+    if (!inherits(statistic, "try-error")){
+        sim_stats <- append(sim_stats, statistic)
+        success <- success + 1
+    }
+  }
+  approx_p <- sum(sim_stats > orig_statistic) / success
+  print(success)
+  return(approx_p)
+}
+
+
+bootstrap_test(returns_2004, 10000)
+bootstrap_test(returns_2006, 10000)
+```
+
+```{r}
+library(goftest)
+set.seed(1)
+aex$Returns = ((aex$Close - aex$Open) / aex$Open)*100
+aex$Year = format(aex$Date, "%Y")
+aex_2004 = aex[aex$Year == 2004, ]
+
+returns_2004 <- aex_2004$Returns
+
+params_2004 <- fitdistr(returns_2004, "t",lower=c(-Inf,0,1))
+df_2004 =params_2004$estimate[3]
+mu_2004 = params_2004$estimate[1]
+sd_2004 = params_2004$estimate[2]
+
+params_2006 <- fitdistr(returns_2006, "t",lower=c(-Inf,0,1))
+df_2006 =params_2006$estimate[3]
+mu_2006 = params_2006$estimate[1]
+sd_2006 = params_2006$estimate[2]
+
+
+ad_2004 <- sapply(c(1:300),function(x) ad.test(x=returns_2004, null="pst", mu=mu_2004 ,nu=df_2004, sigma=sd_2004, estimated=TRUE)$p.value)
+ad_2006 <- sapply(c(1:300),function(x) ad.test(x=returns_2006, null="pst", mu=mu_2006 ,nu=df_2006, sigma=sd_2006, estimated=TRUE)$p.value)
+
+min(ad_2004)
+max(ad_2004)
+mean(ad_2004)
+sd(ad_2004)
+length(ad_2004[ad_2004<0.05])/length(ad_2004)
+
+min(ad_2006)
+max(ad_2006)
+mean(ad_2006)
+sd(ad_2006)
+length(ad_2006[ad_2006<0.05])/length(ad_2006)
+```
+
+
+
+3.l
+```{r}
+aex$Date <- as.Date(aex$Date)
+
+nasdaq = read.csv("data/NASDAQ-100.csv")
+nasdaq$Date <- as.Date(nasdaq$Date)
+nasdaq$Returns <- (nasdaq$Close - nasdaq$Open) / nasdaq$Open
+
+nasdaq_aex_matched <- nasdaq %>% filter(Date %in% aex$Date)
+aex_nasdaq_matched <- aex %>% filter(Date %in% nasdaq_aex_matched$Date)
+
+plot(nasdaq_aex_matched$Returns, aex_nasdaq_matched$Returns, cex=.01, main="AEX returns against Nasdaq returns.", xlab = "Nasdaq returns", ylab = "AEX returns")
+cor.test(nasdaq_aex_matched$Returns, aex_nasdaq_matched$Returns)
+```
+
+```{r}
+aex$PreviousDay <- aex$Date - 1
+nasdaq_filtered <- nasdaq %>% filter(Date %in% aex$PreviousDay)
+aex_filtered <- aex %>% filter(PreviousDay %in% nasdaq_filtered$Date)
+
+# sanity check.
+any(unlist(Map(function(x, y) x != y, nasdaq_filtered$Date, aex_filtered$PreviousDay)))
+
+plot(nasdaq_filtered$Returns, aex_filtered$Returns, cex=.3, main="AEX returns against Nasdaq returns previous day.", xlab = "Nasdaq returns previous day", ylab = "AEX returns")
+cor.test(nasdaq_filtered$Returns, aex_filtered$Returns)
+```
+
+
+```{r}
+library(ggplot2)
+nasdaq_in_aex <- nasdaq %>% filter(Date %in% aex$Date)
+nasdaq_in_aex$DeltaReturns <- nasdaq_in_aex$Returns - filter(aex, Date %in% nasdaq_in_aex$Date)$Returns
+
+nasdaq_filtered <- nasdaq_in_aex %>% filter(Date %in% aex$PreviousDay)
+aex_filtered <- aex %>% filter(PreviousDay %in% nasdaq_filtered$Date)
+
+plot(nasdaq_filtered$DeltaReturns, aex_filtered$Returns, cex=.3, main="AEX returns against Nasdaq-AEX Returns previous day.", xlab = "Nasdaq-AEX Returns returns previous day", ylab = "AEX returns")
+cor.test(nasdaq_filtered$DeltaReturns, aex_filtered$Returns)
+```
+
+
+
+
 

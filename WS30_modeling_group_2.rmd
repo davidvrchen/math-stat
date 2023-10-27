@@ -67,19 +67,35 @@ If the sample deviation at 1993-1995 is 44.56, with a mean of 373,98. It will be
 ### 1.c
 
 ```{r}
+library(ggplot2)
 aex$Returns = (aex$Close - aex$Open) / aex$Open
 
-ggplot(aex %>% filter(aex$Year>"2006",aex$Year<"2010") ) +
+ggplot(aex ) +
   geom_point(mapping=aes(x=Date, y=Returns, group=1), color = "blue", size = 0.05)
 ```
 
 relevant summaries:
 
 ```{r}
-print(summary(aex$Returns))
-print(paste("SD: ", sd(aex$Returns)))
-hist(aex$Returns, breaks=100)
 aex$Year = format(aex$Date, "%Y")
+
+data <- aex[(aex$Year >= 1993) & (aex$Year <= 1995),]$Returns
+length(data)
+print(summary(data))
+print(paste("SD: ", sd(data)))
+hist(aex$Returns, breaks=100)
+
+boxplot(aex$Returns ~ aex$Year)
+```
+```{r}
+aex$Year = format(aex$Date, "%Y")
+
+data <- aex[(aex$Year >= 1996) & (aex$Year <= 1998),]$Returns
+length(data)
+print(summary(data))
+print(paste("SD: ", sd(data)))
+hist(aex$Returns, breaks=100)
+
 boxplot(aex$Returns ~ aex$Year)
 ```
 

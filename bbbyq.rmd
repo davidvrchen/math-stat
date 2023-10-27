@@ -1,0 +1,42 @@
+```{r}
+# Load the data.
+library("ggplot2")
+library("car")
+#library(hrbrthemes)
+library(LaplacesDemon)
+library(dplyr)
+library(MASS)
+library(dplyr)
+library(report)
+
+report::cite_packages()
+
+
+data = read.csv("data/BBBYQ.csv")
+data$Date = as.Date(data$Date)
+
+data$Returns = (data$Close - data$Open) / data$Open
+data$Year = format(data$Date, "%Y")
+
+data
+
+```
+```{r}
+acf(data$Returns)
+```
+
+
+```{r}
+library(randtests)
+
+runs.test(x=data$Returns, alternative="two.sided", plot=TRUE)
+```
+
+
+
+```{r}
+summary(data$Returns)
+length(data$Returns)
+sd(data$Returns)
+```
+
